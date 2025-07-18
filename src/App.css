@@ -1,0 +1,29 @@
+/* Estilos generales para ocupar toda la pantalla */
+html, body, #root {
+  height: 100%;
+  margin: 0;
+  padding: 0;
+  font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+}
+
+/* ---------- OPCIÓN 1: COLOR SÓLIDO ---------- */
+/*
+body {
+  background-color: #f0f4f8;  Color suave grisáceo-azulado
+}
+*/
+
+/* ---------- OPCIÓN 2: IMAGEN DE FONDO ---------- */
+/*
+body {
+  background-image: url('/fondo.jpg');  Asegúrate de colocar la imagen en la carpeta public/
+  background-size: cover;
+  background-repeat: no-repeat;
+  background-position: center center;
+}
+*/
+
+/* ---------- OPCIÓN 3: DEGRADADO ---------- */
+body {
+  background: linear-gradient(to right, #f9fafc, #cbd5e1); /* Degradado suave */
+}
