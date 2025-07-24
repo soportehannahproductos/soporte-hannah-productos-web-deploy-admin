@@ -1,4 +1,4 @@
-import React from 'react'
+import React, { useEffect, useState } from 'react'
 import {
   Dialog,
   DialogTitle,
@@ -9,11 +9,28 @@ import {
   useMediaQuery,
   useTheme,
   Box,
+  MenuItem,
 } from '@mui/material'
+import { fetchCategorias } from '../../service/categoriaApi' // ✅ ajustá la ruta si es necesario
 
 export default function EditModal({ open, onClose, product, formData, setFormData, onSave }) {
   const theme = useTheme()
   const fullScreen = useMediaQuery(theme.breakpoints.down('sm'))
+
+  const [categorias, setCategorias] = useState([])
+
+  useEffect(() => {
+    const getCategorias = async () => {
+      try {
+        const data = await fetchCategorias()
+        setCategorias(data)
+      } catch (error) {
+        console.error('Error al obtener categorías:', error)
+      }
+    }
+
+    getCategorias()
+  }, [])
 
   const isSaveDisabled =
     !formData.title?.trim() ||
@@ -60,15 +77,11 @@ export default function EditModal({ open, onClose, product, formData, setFormDat
           component="form"
           noValidate
           autoComplete="off"
-          sx={{
-            display: 'flex',
-            flexDirection: 'column',
-            gap: 2,
-          }}
+          sx={{ display: 'flex', flexDirection: 'column', gap: 2 }}
         >
           <TextField
             label="Nombre"
-            value={formData.title}
+            value={formData.title || ''}
             onChange={(e) => setFormData((f) => ({ ...f, title: e.target.value }))}
             fullWidth
           />
@@ -84,7 +97,7 @@ export default function EditModal({ open, onClose, product, formData, setFormDat
             label="Precio"
             type="number"
             inputProps={{ min: 0, step: '0.01' }}
-            value={formData.price}
+            value={formData.price || ''}
             onChange={(e) => setFormData((f) => ({ ...f, price: e.target.value }))}
             fullWidth
           />
@@ -98,16 +111,23 @@ export default function EditModal({ open, onClose, product, formData, setFormDat
           />
           <TextField
             label="URL de la imagen"
-            value={formData.image}
+            value={formData.image || ''}
             onChange={(e) => setFormData((f) => ({ ...f, image: e.target.value }))}
             fullWidth
           />
           <TextField
+            select
             label="Categoría"
-            value={formData.category}
+            value={formData.category || ''}
             onChange={(e) => setFormData((f) => ({ ...f, category: e.target.value }))}
             fullWidth
-          />
+          >
+            {categorias.map((cat) => (
+              <MenuItem key={cat.id} value={cat.nombre}>
+                {cat.nombre}
+              </MenuItem>
+            ))}
+          </TextField>
         </Box>
       </DialogContent>
 

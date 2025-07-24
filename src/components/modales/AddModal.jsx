@@ -1,4 +1,4 @@
-import React from 'react'
+import React, { useEffect, useState } from 'react'
 import {
   Dialog,
   DialogTitle,
@@ -9,11 +9,34 @@ import {
   useMediaQuery,
   useTheme,
   Box,
+  MenuItem,
 } from '@mui/material'
+import { fetchCategorias } from '../../service/categoriaApi' // ✅ asegúrate que la ruta sea correcta
 
-export default function AddModal({ open, onClose, formData, setFormData, onSave }) {
+export default function AddModal({
+  open,
+  onClose,
+  formData,
+  setFormData,
+  onSave,
+}) {
   const theme = useTheme()
   const fullScreen = useMediaQuery(theme.breakpoints.down('sm'))
+
+  const [categorias, setCategorias] = useState([])
+
+  useEffect(() => {
+    const getCategorias = async () => {
+      try {
+        const data = await fetchCategorias()
+        setCategorias(data)
+      } catch (error) {
+        console.error('Error al cargar categorías:', error)
+      }
+    }
+
+    getCategorias()
+  }, [])
 
   return (
     <Dialog
@@ -50,11 +73,7 @@ export default function AddModal({ open, onClose, formData, setFormData, onSave 
           component="form"
           noValidate
           autoComplete="off"
-          sx={{
-            display: 'flex',
-            flexDirection: 'column',
-            gap: 2,
-          }}
+          sx={{ display: 'flex', flexDirection: 'column', gap: 2 }}
         >
           <TextField
             label="Título"
@@ -95,11 +114,18 @@ export default function AddModal({ open, onClose, formData, setFormData, onSave 
             helperText="Ingrese la URL completa de la imagen"
           />
           <TextField
+            select
             label="Categoría"
             value={formData.category || ''}
             onChange={(e) => setFormData((f) => ({ ...f, category: e.target.value }))}
             fullWidth
-          />
+          >
+            {categorias.map((cat) => (
+              <MenuItem key={cat.id} value={cat.nombre}>
+                {cat.nombre}
+              </MenuItem>
+            ))}
+          </TextField>
         </Box>
       </DialogContent>
 

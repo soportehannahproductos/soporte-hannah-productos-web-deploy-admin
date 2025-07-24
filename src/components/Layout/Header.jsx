@@ -5,30 +5,45 @@ import {
   Toolbar,
   Typography,
   IconButton,
-  // Badge,
   Box,
   Menu,
-  MenuItem
+  MenuItem,
+  Button,
+  useMediaQuery,
+  useTheme
 } from '@mui/material'
-// import ShoppingCartIcon from '@mui/icons-material/ShoppingCart'
-// import StoreIcon from '@mui/icons-material/Store'
 import MenuIcon from '@mui/icons-material/Menu'
-
+import HomeIcon from '@mui/icons-material/Home'
+import StorefrontIcon from '@mui/icons-material/Storefront'
+import CategoryIcon from '@mui/icons-material/Category'
+import LogoutIcon from '@mui/icons-material/Logout'
 import logo from '../../assets/logo2.png'
 
 export default function Header() {
   const navigate = useNavigate()
+  const theme = useTheme()
+  const isMobile = useMediaQuery(theme.breakpoints.down('md'))
+
   const [anchorEl, setAnchorEl] = useState(null)
 
-  const categorias = ['Indumentaria', 'Herramientas', 'Artefactos']
+  const handleMenuOpen = (event) => setAnchorEl(event.currentTarget)
+  const handleMenuClose = () => setAnchorEl(null)
 
-  const handleMenuOpen = (event) => {
-    setAnchorEl(event.currentTarget)
+  const handleNavigate = (path) => {
+    navigate(path)
+    handleMenuClose()
   }
 
-  const handleMenuClose = () => {
-    setAnchorEl(null)
+  const handleLogout = () => {
+    localStorage.removeItem('logueado')
+    navigate('/login')
   }
+
+  const items = [
+    { label: 'Inicio', path: '/', icon: <HomeIcon fontSize="small" sx={{ mr: 1 }} /> },
+    { label: 'Productos', path: '/productos', icon: <StorefrontIcon fontSize="small" sx={{ mr: 1 }} /> },
+    { label: 'Categorías', path: '/categorias', icon: <CategoryIcon fontSize="small" sx={{ mr: 1 }} /> },
+  ]
 
   return (
     <AppBar
@@ -43,7 +58,7 @@ export default function Header() {
         {/* Logo + Marca */}
         <Box
           sx={{ display: 'flex', alignItems: 'center', cursor: 'pointer' }}
-          onClick={() => navigate('/')}
+          onClick={() => handleNavigate('/')}
         >
           <Box
             component="img"
@@ -83,8 +98,7 @@ export default function Header() {
               sx={{
                 color: '#999',
                 fontSize: '0.7rem',
-                fontStyle: 'italic',
-                mt: 0.5
+                fontStyle: 'italic'
               }}
             >
               Administrador
@@ -92,64 +106,84 @@ export default function Header() {
           </Box>
         </Box>
 
-        {/* Botones del lado derecho */}
-        <Box sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
-          {/* Íconos deshabilitados por ahora */}
-          {/*
-          <IconButton
-            aria-label="ventas"
-            onClick={() => navigate('/ventas')}
-            sx={{ color: '#444' }}
-          >
-            <Badge badgeContent={3} color="secondary">
-              <ShoppingCartIcon />
-            </Badge>
-          </IconButton>
-
-          <IconButton
-            aria-label="mis-productos"
-            onClick={() => navigate('/misproductos')}
-            sx={{ color: '#444' }}
-          >
-            <Badge badgeContent={3} color="secondary">
-              <StoreIcon />
-            </Badge>
-          </IconButton>
-          */}
-
-          {/* Menú hamburguesa móvil */}
-          <IconButton
-            aria-label="categorías"
-            onClick={handleMenuOpen}
-            sx={{
-              display: { xs: 'inline-flex', md: 'none' },
-              color: '#444'
-            }}
-          >
-            <MenuIcon />
-          </IconButton>
+        {/* Navegación */}
+        <Box sx={{ display: 'flex', alignItems: 'center', gap: 2 }}>
+          {!isMobile ? (
+            // 🖥️ Desktop: mostrar botones + botón cerrar sesión con iconos
+            <>
+              {items.map((item) => (
+                <Button
+                  key={item.label}
+                  onClick={() => handleNavigate(item.path)}
+                  sx={{
+                    color: '#444',
+                    fontWeight: 'bold',
+                    textTransform: 'none',
+                    display: 'flex',
+                    alignItems: 'center',
+                    '&:hover': {
+                      color: '#000',
+                      backgroundColor: 'rgba(0,0,0,0.04)'
+                    }
+                  }}
+                >
+                  {item.icon}
+                  {item.label}
+                </Button>
+              ))}
+              <Button
+                color="error"
+                variant="outlined"
+                onClick={handleLogout}
+                sx={{
+                  textTransform: 'none',
+                  fontWeight: 'bold',
+                  display: 'flex',
+                  alignItems: 'center'
+                }}
+              >
+                <LogoutIcon fontSize="small" sx={{ mr: 1 }} />
+                Cerrar sesión
+              </Button>
+            </>
+          ) : (
+            // 📱 Mobile: menú hamburguesa + opción cerrar sesión con iconos
+            <>
+              <IconButton
+                aria-label="menú"
+                onClick={handleMenuOpen}
+                sx={{ color: '#444' }}
+              >
+                <MenuIcon />
+              </IconButton>
+              <Menu
+                anchorEl={anchorEl}
+                open={Boolean(anchorEl)}
+                onClose={handleMenuClose}
+                anchorOrigin={{ vertical: 'bottom', horizontal: 'right' }}
+                transformOrigin={{ vertical: 'top', horizontal: 'right' }}
+              >
+                {items.map((item) => (
+                  <MenuItem
+                    key={item.label}
+                    onClick={() => handleNavigate(item.path)}
+                    sx={{ display: 'flex', alignItems: 'center' }}
+                  >
+                    {item.icon}
+                    {item.label}
+                  </MenuItem>
+                ))}
+                <MenuItem
+                  onClick={handleLogout}
+                  sx={{ color: 'red', display: 'flex', alignItems: 'center' }}
+                >
+                  <LogoutIcon fontSize="small" sx={{ mr: 1 }} />
+                  Cerrar sesión
+                </MenuItem>
+              </Menu>
+            </>
+          )}
         </Box>
-
-        {/* Menú desplegable de categorías */}
-        <Menu
-          anchorEl={anchorEl}
-          open={Boolean(anchorEl)}
-          onClose={handleMenuClose}
-          anchorOrigin={{ vertical: 'bottom', horizontal: 'right' }}
-          transformOrigin={{ vertical: 'top', horizontal: 'right' }}
-        >
-          {categorias.map((categoria) => (
-            <MenuItem
-              key={categoria}
-              onClick={() => {
-                navigate(`/categoria/${categoria.toLowerCase()}`)
-                handleMenuClose()
-              }}
-            >
-              {categoria}
-            </MenuItem>
-          ))}
-        </Menu>
       </Toolbar>
     </AppBar>
   )
